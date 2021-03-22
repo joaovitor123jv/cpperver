@@ -1,0 +1,8 @@
+# Default-generated Unix executables
+server
+server_debug
+
+# Remainings of copilation 
+*.o
+
+
