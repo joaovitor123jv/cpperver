@@ -1,27 +1,32 @@
-#pragma once
+#ifndef __CERVER_REQUEST_HEADER
+#define __CERVER_REQUEST_HEADER
 
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <errno.h>
-#include <unistd.h>
-#include <netdb.h> // for getnameinfo()
+
+#if _WIN32
+    #include<winsock2.h>
+#else
+    #include <netdb.h> // for getnameinfo()
+    #include <sys/socket.h>
+    #include <netinet/in.h>
+    #include <arpa/inet.h>
+    #include <unistd.h>
+#endif
 
 // Usual socket headers
 #include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
 
-#include <arpa/inet.h>
+
 
 #define SIZE 1024
-#define BACKLOG 10 // Passed to listen()
+
 
 class Request {
-    private:
+    protected:
         int client_socket;
-        const std::string http_header = "HTTP/1.1 200 OK\r\n\n";
-        const std::string http_internal_error_header = "HTTP/1.1 500 ERROR\r\n\n";
         std::string response_data;
 
     public:
@@ -30,7 +35,15 @@ class Request {
         }
 
         ~Request() {
-            ::close(client_socket);
+            this->close_connection();
+        }
+        
+        void close_connection() {
+            #if _WIN32
+                ::closesocket(client_socket);
+            #else // macOS, Linux, *BSD
+                ::close(this->socket);
+            #endif
         }
 
         void append_file(std::string file_name) {
@@ -45,19 +58,15 @@ class Request {
         }
 
         void respond() {
-            std::string http_response = http_header + response_data;
-            std::cout << "RESPONSE: " << http_response << std::endl;
-            ::send(client_socket, http_response.c_str(), http_response.length(), 0);
+            std::cout << "RESPONSE: " << response_data << std::endl;
+            ::send(client_socket, response_data.c_str(), response_data.length(), 0);
         }
 
         void respond(std::string content) {
-            std::string http_response = http_header + content;
-            std::cout << "RESPONSE: " << http_response << std::endl;
-            ::send(client_socket, http_response.c_str(), http_response.length(), 0);
-        }
-
-        void respond_server_error() {
-            std::string http_response = http_internal_error_header + "INTERNAL ERROR";
-            ::send(client_socket, http_response.c_str(), http_response.length(), 0);
+            std::cout << "RESPONSE: " << content << std::endl;
+            ::send(client_socket, content.c_str(), content.length(), 0);
         }
 };
+
+
+#endif // __CERVER_REQUEST_HEADER
