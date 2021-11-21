@@ -3,7 +3,7 @@
 #include <string.h>
 
 #include "lib/cerver.hpp"
-#include "router.hpp"
+#include "lib/http_router.hpp"
 
 struct ServerContext {
     int socket;
@@ -25,29 +25,23 @@ bool request_handler(Request *request) {
 int main(void) {
     Cerver server = Cerver(8001);
 
-    Router router = Router();
+    HttpRouter router = HttpRouter();
 
-    router.add_route("/", [](Request *request) -> bool {
+    router.add_route("/", [](HttpRequest *request) -> bool {
         std::cout << "I can know what is this" << std::endl;
         request->append_file("index.html");
         return true;
     });
 
-    router.add_route("/test", [](Request *request) -> bool {
+    router.add_route("/test", [](HttpRequest *request) -> bool {
         std::cout << "I can know what is this too (/test)" << std::endl;
         request->append_file("test.html");
         return true;
     });
 
-    server.process_requests_with(&request_handler);
+    // server.process_requests_with(&request_handler);
 
-    server.start();
-
-    // while(true) {
-    //     Request request = server.listen();
-    //     request.append_file("index.html");
-    //     request.respond();
-    // }
+    server.start(&router);
 
     return 0;
 }
