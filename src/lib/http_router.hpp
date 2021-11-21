@@ -12,16 +12,26 @@ typedef bool (*HttpRequestHandler) (HttpRequest *);
 
 class HttpRouter {
     private:
-        bool allow_csrf = false;
+        bool allow_csrf;
         std::map<std::string, bool (*)(HttpRequest *)> routes;
 
-    public:
-
-        HttpRouter() {
+        void set_not_found_route() {
             this->routes["not_found"] = [](HttpRequest *request) -> bool {
                 request->respond("ROUTE NOT FOUND");
                 return true;
             };
+        }
+ 
+    public:
+
+        HttpRouter() {
+            this->allow_csrf = false;
+            this->set_not_found_route();
+        }
+
+        HttpRouter(bool allow_csrf) {
+            this->allow_csrf = allow_csrf;
+            this->set_not_found_route();
         }
 
         bool add_route(std::string route_path, bool (*handler)(HttpRequest *request)) {
