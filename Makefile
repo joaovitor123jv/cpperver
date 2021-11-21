@@ -1,4 +1,5 @@
 CC=g++
+CC_FLAGS=-Wall
 
 SOURCE_FOLDER=src
 BIN_NAME=server
@@ -16,6 +17,7 @@ ifeq ($(OS), Windows_NT)
 	ifeq ($(PROCESSOR_ARCHITECTURE), AMD64)
 		OSFLAG += -D AMD64
 	endif
+
 	ifeq ($(PROCESSOR_ARCHITECTURE), x86)
 		OSFLAG += -D IA32
 	endif
@@ -25,17 +27,23 @@ else
 	ifeq ($(UNAME_S), Linux)
 		OSFLAG += -D LINUX
 	endif
+
 	ifeq ($(UNAME_S), Darwin)
 		OSFLAG += -D OSX
+		CC_FLAGS+= -std=c++11
+		CC_FLAGS+= -stdlib=libc++
+		CC=clang++
 	endif
 # Processor type
-		UNAME_P := $(shell uname -p)
+	UNAME_P := $(shell uname -p)
 	ifeq ($(UNAME_P),x86_64)
 		OSFLAG += -D AMD64
 	endif
-		ifneq ($(filter %86, $(UNAME_P)),)
-	OSFLAG += -D IA32
-		endif
+
+	ifneq ($(filter %86, $(UNAME_P)),)
+		OSFLAG += -D IA32
+	endif
+
 	ifneq ($(filter arm%, $(UNAME_P)),)
 		OSFLAG += -D ARM
 	endif
@@ -44,13 +52,13 @@ endif
 
 
 all: $(BIN_NAME)
-	echo "Finalizado"
+	@echo "Compilation completed"
 
 $(BIN_NAME): $(SOURCE_FOLDER)/$(MAIN_FILE)
-	$(CC) $^ -Wall -o $(BIN_NAME) $(LINKERS) $(OSFLAG)
+	$(CC) $(CC_FLAGS) $^ -Wall -o $(BIN_NAME) $(LINKERS) $(OSFLAG)
 
 server_debug: $(SOURCE_FOLDER)/$(MAIN_FILE)
-	$(CC) $^ -Wall -g -o debug_$(BIN_NAME) $(LINKERS) $(OSFLAG)
+	$(CC) $(CC_FLAGS) $^ -Wall -g -o debug_$(BIN_NAME) $(LINKERS) $(OSFLAG)
 
 test: 
 	rm -f server_debug
