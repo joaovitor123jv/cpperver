@@ -42,7 +42,7 @@ class Request {
             #if _WIN32
                 ::closesocket(client_socket);
             #else // macOS, Linux, *BSD
-                ::close(this->socket);
+                ::close(this->client_socket);
             #endif
         }
 

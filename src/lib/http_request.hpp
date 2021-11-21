@@ -49,7 +49,11 @@ class HttpRequest : public Request {
                     std::cout << "Finished receiving bytes from client..." << std::endl;
                 }
                 else {
-                    std::cout << "Failed to receive data: " << WSAGetLastError() << std::endl;
+                    #if _WIN32
+                        std::cout << "Failed to receive data: " << WSAGetLastError() << std::endl;
+                    #else
+                        std::cout << "Failed to receive data" << std::endl;
+                    #endif
                     this->close_connection();
                     return false;
                 }
@@ -63,6 +67,7 @@ class HttpRequest : public Request {
     
         bool process_received_request() {
             // TODO: implement (probably an automata to read all lines and extract info about HTTP method, URL, Host...)s
+            return false;
         }
 };
 
