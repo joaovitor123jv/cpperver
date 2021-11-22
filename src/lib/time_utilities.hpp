@@ -45,14 +45,14 @@ class Stopwatch {
                 if(elapsed_time < 1.0 && elapsed_time >= 0.001) {
                     fprintf(
                         stdout,
-                        "Elapsed time (start -> finish): %.5fms\n",
-                        elapsed_time*1000.0
+                        "Elapsed time (start -> finish): %dms\n",
+                        (int)(elapsed_time*1000)
                     );
                 } else if(elapsed_time < 0.001) {
                     fprintf(
                         stdout,
-                        "Elapsed time (start -> finish): %.5fns\n",
-                        elapsed_time*1000.0*1000.0
+                        "Elapsed time (start -> finish): %dns\n",
+                        (int)(elapsed_time*1000*1000)
                     );
                 } else {
                     fprintf(
@@ -70,14 +70,14 @@ class Stopwatch {
                 if(elapsed_time < 1.0 && elapsed_time >= 0.01) {
                     fprintf(
                         stdout,
-                        "Elapsed time (created -> started): %.5fms\n",
-                        elapsed_time*1000.0
+                        "Elapsed time (created -> started): %dms\n",
+                        (int)(elapsed_time*1000)
                     );
                 } else if(elapsed_time < 0.001) {
                     fprintf(
                         stdout,
-                        "Elapsed time (created -> started): %.5fns\n",
-                        elapsed_time*1000.0*1000.0
+                        "Elapsed time (created -> started): %dns\n",
+                        (int)(elapsed_time*1000*1000)
                     );
                 } else {
                     fprintf(
