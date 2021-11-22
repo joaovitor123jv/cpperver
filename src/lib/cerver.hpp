@@ -37,6 +37,11 @@ private:
 #endif // else _WIN32
 
 #if _WIN32
+    /**
+     * @brief Create a socket object
+     * 
+     * @return SOCKET 
+     */
     SOCKET create_socket(void)
     {
         SOCKET created_socket = ::socket(AF_INET, SOCK_STREAM, 0);
@@ -50,6 +55,11 @@ private:
     }
 
 #else // _WIN32
+    /**
+     * @brief Create a socket object
+     * 
+     * @return int 
+     */
     int create_socket(void)
     {
         // Socket setup: creates an endpoint for communication, returns a descriptor
@@ -62,6 +72,11 @@ private:
     }
 #endif // else _WIN32
 
+    /**
+     * @brief Create an address object
+     * 
+     * @return struct sockaddr_in* 
+     */
     struct sockaddr_in *create_address()
     {
         // Construct local address structure
@@ -79,6 +94,10 @@ private:
         return server_address;
     }
 
+    /**
+     * @brief Show the created server status
+     * 
+     */
     void show_status()
     {
 #if _WIN32
@@ -111,6 +130,11 @@ private:
 #endif // else _WIN32
     }
 
+    /**
+     * @brief Start listening for connections on server. Returns a client socket when connected
+     * 
+     * @return int 
+     */
     int listen()
     {
         std::cout << "Waiting for incoming connections..." << std::endl;
@@ -131,6 +155,12 @@ private:
     }
 
 #if _WIN32
+    /**
+     * @brief Initializes winsocket (WSA) to allow sockets creation
+     * 
+     * @return true 
+     * @return false 
+     */
     bool initialize_winsocket()
     {
         std::cout << "Initialising Winsock..." << std::endl;
@@ -150,7 +180,11 @@ private:
 #endif // _WIN32
 
 public:
-
+    /**
+     * @brief Construct a new Cerver object
+     * 
+     * @param port The port the server will listen to
+     */
     Cerver(unsigned int port)
     {
 #if _WIN32
@@ -179,6 +213,10 @@ public:
         show_status();
     }
 
+    /**
+     * @brief Destroy the Cerver object
+     * 
+     */
     ~Cerver()
     {
         this->close_connection();
@@ -187,23 +225,43 @@ public:
     }
 
 #if _WIN32
+    /**
+     * @brief Interrupts communication with client and close server
+     * 
+     */
     void close_connection()
     {
         closesocket(this->socket);
         WSACleanup();
     }
 #else // _WIN32
+    /**
+     * @brief Interrupts communication with client and close server
+     * 
+     */
     void close_connection()
     {
         ::close(this->socket);
     }
 #endif // else _WIN32
 
+    /**
+     * @brief Defines a function to be executed when detected a new client.
+     * Required when processing requests manually (instead of using a
+     * HttpRouter, for instance)
+     * 
+     * @param handler_function The function that will process the request
+     */
     void process_requests_with(bool (*handler_function)(Request *request))
     {
         this->requests_handler = handler_function;
     }
 
+    /**
+     * @brief Starts the server, listening to connections and sending identified
+     * clients to be processed with the defined handler
+     * 
+     */
     void start()
     {
         Stopwatch request_timer = Stopwatch();
@@ -227,10 +285,17 @@ public:
         }
     }
 
+    /**
+     * @brief Starts the server, listening to the specified port, and process
+     * requests through the received `router`
+     * 
+     * @param router The HttpRouter that will manage the requests flow
+     */
     void start(HttpRouter *router)
     {
         if (router == NULL)
             std::cout << "Failed to start server. Router is null" << std::endl;
+
         Stopwatch request_timer = Stopwatch();
 
         while (true)
@@ -248,19 +313,16 @@ public:
             bool executed_successfully = handler(&request);
 
             if (executed_successfully)
-            {
                 std::cout << "ALL OK" << std::endl;
-                request.respond();
-            }
             else
             {
                 std::cout << "ALL NOT OK" << std::endl;
                 // TODO: Send response as HttpRequest
-                // request.respond_server_error();
+                // request.respond_internal_server_error();
             }
             request_timer.finish();
             request_timer.print_elapsed_time();
-            request_timer.print_elapsed_time();
+            request_timer.reset_times();
         }
     }
 };
